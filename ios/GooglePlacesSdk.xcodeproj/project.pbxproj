@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5E555C0D2413F4C50049A1A2 /* GooglePlacesSdk.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* GooglePlacesSdk.m */; };
-		F4FF95D7245B92E800C19C63 /*  GooglePlacesSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /*  GooglePlacesSdk.swift */; };
+		A434CBB82982D1A80055C81D /* GooglePlacesSdkUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A434CBB72982D1A80055C81D /* GooglePlacesSdkUtils.swift */; };
+		F4FF95D7245B92E800C19C63 /* GooglePlacesSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* GooglePlacesSdk.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +25,7 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libGooglePlacesSdk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libGooglePlacesSdk.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A434CBB72982D1A80055C81D /* GooglePlacesSdkUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GooglePlacesSdkUtils.swift; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* GooglePlacesSdk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GooglePlacesSdk.m; sourceTree = "<group>"; };
 		F4FF95D5245B92E700C19C63 /* GooglePlacesSdk-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GooglePlacesSdk-Bridging-Header.h"; sourceTree = "<group>"; };
 		F4FF95D6245B92E800C19C63 /* GooglePlacesSdk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GooglePlacesSdk.swift; sourceTree = "<group>"; };
@@ -52,6 +53,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				A434CBB72982D1A80055C81D /* GooglePlacesSdkUtils.swift */,
 				F4FF95D6245B92E800C19C63 /* GooglePlacesSdk.swift */,
 				B3E7B5891CC2AC0600A0062D /* GooglePlacesSdk.m */,
 				F4FF95D5245B92E700C19C63 /* GooglePlacesSdk-Bridging-Header.h */,
@@ -117,7 +119,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F4FF95D7245B92E800C19C63 /* GooglePlacesSdk.swift in Sources */,
-				B3E7B58A1CC2AC0600A0062D /* GooglePlacesSdk.m in Sources */,
+				A434CBB82982D1A80055C81D /* GooglePlacesSdkUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
