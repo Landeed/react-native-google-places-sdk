@@ -122,12 +122,16 @@ func GMSPlaceFieldsFromFields(fields: NSArray) -> GMSPlaceField {
     "priceLevel": GMSPlaceField.priceLevel,
     "website": GMSPlaceField.website,
     "viewport": GMSPlaceField.viewport,
+    "formattedAddress": GMSPlaceField.formattedAddress,
     "addressComponents": GMSPlaceField.addressComponents,
-    "photos": GMSPlaceField.photos,
     "userRatingsTotal": GMSPlaceField.userRatingsTotal,
     "utcOffsetMinutes": GMSPlaceField.utcOffsetMinutes,
     "businessStatus": GMSPlaceField.businessStatus,
     "iconImageURL": GMSPlaceField.iconImageURL,
+    "takeout": GMSPlaceField.takeout,
+    "delivery": GMSPlaceField.delivery,
+    "dineIn": GMSPlaceField.dineIn,
+    "curbsidePickup": GMSPlaceField.curbsidePickup,
   ]
   
   var parsedFields: GMSPlaceField = []
@@ -138,10 +142,42 @@ func GMSPlaceFieldsFromFields(fields: NSArray) -> GMSPlaceField {
   }
   
   if (parsedFields.isEmpty) {
-    return [GMSPlaceField.all]
+    for field in fieldMap.allValues {
+      if let parsedField = field as? GMSPlaceField {
+        parsedFields.insert(parsedField)
+      }
+    }
   }
   
   return parsedFields
+}
+
+func ParseBooleanPlaceAttribute(val: GMSBooleanPlaceAttribute) -> String {
+  if (val == GMSBooleanPlaceAttribute.true) {
+    return "yes";
+  }
+  
+  if (val == GMSBooleanPlaceAttribute.false) {
+    return "no";
+  }
+  
+  return "unknown"
+}
+
+func ParseBusinessStatus(val: GMSPlacesBusinessStatus) -> String {
+  if (val == GMSPlacesBusinessStatus.closedPermanently) {
+    return "closedPermanently";
+  }
+  
+  if (val == GMSPlacesBusinessStatus.closedTemporarily) {
+    return "closedTemporariliy";
+  }
+  
+  if (val == GMSPlacesBusinessStatus.operational) {
+    return "operational";
+  }
+  
+  return "unknown";
 }
 
 func ParsePlace(place: GMSPlace) -> NSDictionary {
@@ -149,10 +185,6 @@ func ParsePlace(place: GMSPlace) -> NSDictionary {
     "types": $0.types,
     "name": $0.name,
     "shortName": $0.shortName ?? "",
-  ]}
-  let photos = place.photos?.compactMap{[
-    "attributions": $0.attributions?.string ?? "",
-    "maxSize": $0.maxSize,
   ]}
 
   var viewport: [String : Any]? = nil
@@ -187,11 +219,16 @@ func ParsePlace(place: GMSPlace) -> NSDictionary {
     "priceLevel": place.priceLevel,
     "website": place.website?.absoluteString ?? NSNull(),
     "viewport": viewport ??  NSNull(),
+    "formattedAddress": place.formattedAddress ?? NSNull(),
     "addressComponents": addressComponents ?? NSNull(),
-    "photos": photos ?? NSNull(),
+    "rating": place.rating,
     "userRatingsTotal": place.userRatingsTotal,
     "utcOffsetMinutes": place.utcOffsetMinutes ?? NSNull(),
-    "businessStatus": place.businessStatus,
+    "businessStatus": ParseBusinessStatus(val: place.businessStatus),
     "iconImageURL": place.iconImageURL?.absoluteString ?? NSNull(),
+    "takeout": ParseBooleanPlaceAttribute(val: place.takeout),
+    "delivery": ParseBooleanPlaceAttribute(val: place.delivery),
+    "dineIn": ParseBooleanPlaceAttribute(val: place.dineIn),
+    "curbsidePickup": ParseBooleanPlaceAttribute(val: place.curbsidePickup),
   ]
 }
