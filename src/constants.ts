@@ -1,0 +1,18 @@
+export const PLACE_FIELDS = Object.freeze({
+  NAME: 'name',
+  PLACE_ID: 'placeID',
+  PLUS_CODE: 'plusCode',
+  COORDINATE: 'coordinate',
+  OPENING_HOURS: 'openingHours',
+  phoneNumber: 'phoneNumber',
+  TYPES: 'types',
+  PRICE_LEVEL: 'priceLevel',
+  WEBSITE: 'website',
+  VIEWPORT: 'viewport',
+  ADDRESS_COMPONENTS: 'addressComponents',
+  PHOTOS: 'photos',
+  USER_RATINGS_TOTAL: 'userRatingsTotal',
+  UTC_OFFSET_MINUTES: 'useOffsetMinutes',
+  BUSINESS_STATUS: 'businessStatus',
+  ICONS_IMAGE_URL: 'iconImageURL',
+});
