@@ -16,7 +16,7 @@ class GooglePlacesSdk: NSObject {
     }
     
     @objc
-    func predictions(_ query: String, filterOptions: NSDictionary,  resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+    func fetchPredictions(_ query: String, filterOptions: NSDictionary,  resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
       guard let client = self.client else {
         reject("-1", NOT_INITIALIZED_MSG, NSError(domain: "", code: 0))
         return
@@ -54,7 +54,7 @@ class GooglePlacesSdk: NSObject {
 
     
     @objc
-    func placeByID(_ placeID: String, fields: NSArray, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+    func fetchPlaceByID(_ placeID: String, fields: NSArray, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
       guard let client = self.client else {
         reject("-1", NOT_INITIALIZED_MSG, NSError(domain: "", code: 0))
         return

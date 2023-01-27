@@ -30,7 +30,7 @@ public class GooglePlacesSdkModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void predictions(String query, ReadableMap options, final Promise promise) {
+  public void fetchPredictions(String query, ReadableMap options, final Promise promise) {
     if (!Places.isInitialized()) {
       promise.reject(
         "-1",
@@ -59,7 +59,7 @@ public class GooglePlacesSdkModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void placeByID(String placeID, ReadableArray fields, final Promise promise) {
+  public void fetchPlaceByID(String placeID, ReadableArray fields, final Promise promise) {
     if (!Places.isInitialized()) {
       promise.reject(
         "-1",
