@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A434CBB82982D1A80055C81D /* GooglePlacesSdkUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A434CBB72982D1A80055C81D /* GooglePlacesSdkUtils.swift */; };
+		A434CBBE29846AC90055C81D /* GooglePlacesSdkConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = A434CBBB298469DB0055C81D /* GooglePlacesSdkConstants.swift */; };
 		F4FF95D7245B92E800C19C63 /* GooglePlacesSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* GooglePlacesSdk.swift */; };
 /* End PBXBuildFile section */
 
@@ -25,10 +26,11 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libGooglePlacesSdk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libGooglePlacesSdk.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		A434CBB72982D1A80055C81D /* GooglePlacesSdkUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GooglePlacesSdkUtils.swift; sourceTree = "<group>"; };
+		A434CBB72982D1A80055C81D /* GooglePlacesSdkUtils.swift */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.swift; path = GooglePlacesSdkUtils.swift; sourceTree = "<group>"; tabWidth = 4; };
+		A434CBBB298469DB0055C81D /* GooglePlacesSdkConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GooglePlacesSdkConstants.swift; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* GooglePlacesSdk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GooglePlacesSdk.m; sourceTree = "<group>"; };
 		F4FF95D5245B92E700C19C63 /* GooglePlacesSdk-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GooglePlacesSdk-Bridging-Header.h"; sourceTree = "<group>"; };
-		F4FF95D6245B92E800C19C63 /* GooglePlacesSdk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GooglePlacesSdk.swift; sourceTree = "<group>"; };
+		F4FF95D6245B92E800C19C63 /* GooglePlacesSdk.swift */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = GooglePlacesSdk.swift; sourceTree = "<group>"; tabWidth = 2; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,13 +55,16 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				A434CBBB298469DB0055C81D /* GooglePlacesSdkConstants.swift */,
 				A434CBB72982D1A80055C81D /* GooglePlacesSdkUtils.swift */,
 				F4FF95D6245B92E800C19C63 /* GooglePlacesSdk.swift */,
 				B3E7B5891CC2AC0600A0062D /* GooglePlacesSdk.m */,
 				F4FF95D5245B92E700C19C63 /* GooglePlacesSdk-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
+			indentWidth = 2;
 			sourceTree = "<group>";
+			tabWidth = 2;
 		};
 /* End PBXGroup section */
 
@@ -118,6 +123,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A434CBBE29846AC90055C81D /* GooglePlacesSdkConstants.swift in Sources */,
 				F4FF95D7245B92E800C19C63 /* GooglePlacesSdk.swift in Sources */,
 				A434CBB82982D1A80055C81D /* GooglePlacesSdkUtils.swift in Sources */,
 			);

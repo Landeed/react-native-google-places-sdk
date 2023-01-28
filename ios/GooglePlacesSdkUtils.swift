@@ -111,38 +111,15 @@ func AutocompleteFilterFromOptions(_ filterOptions: NSDictionary) -> GMSAutocomp
 }
 
 func GMSPlaceFieldsFromFields(fields: NSArray) -> GMSPlaceField {
-  let fieldMap: NSDictionary = [
-    "name": GMSPlaceField.name,
-    "placeID": GMSPlaceField.placeID,
-    "plusCode": GMSPlaceField.plusCode,
-    "coordinate": GMSPlaceField.coordinate,
-    "openingHours": GMSPlaceField.openingHours,
-    "phoneNumber": GMSPlaceField.phoneNumber,
-    "types": GMSPlaceField.types,
-    "priceLevel": GMSPlaceField.priceLevel,
-    "website": GMSPlaceField.website,
-    "viewport": GMSPlaceField.viewport,
-    "formattedAddress": GMSPlaceField.formattedAddress,
-    "addressComponents": GMSPlaceField.addressComponents,
-    "userRatingsTotal": GMSPlaceField.userRatingsTotal,
-    "utcOffsetMinutes": GMSPlaceField.utcOffsetMinutes,
-    "businessStatus": GMSPlaceField.businessStatus,
-    "iconImageURL": GMSPlaceField.iconImageURL,
-    "takeout": GMSPlaceField.takeout,
-    "delivery": GMSPlaceField.delivery,
-    "dineIn": GMSPlaceField.dineIn,
-    "curbsidePickup": GMSPlaceField.curbsidePickup,
-  ]
-  
   var parsedFields: GMSPlaceField = []
   for field in fields {
-    if let parsedField = fieldMap[field] as? GMSPlaceField {
+    if let parsedField = PLACE_FIELD_MAP[field] as? GMSPlaceField {
       parsedFields.insert(parsedField)
     }
   }
   
   if (parsedFields.isEmpty) {
-    for field in fieldMap.allValues {
+    for field in PLACE_FIELD_MAP.allValues {
       if let parsedField = field as? GMSPlaceField {
         parsedFields.insert(parsedField)
       }
@@ -154,30 +131,53 @@ func GMSPlaceFieldsFromFields(fields: NSArray) -> GMSPlaceField {
 
 func ParseBooleanPlaceAttribute(val: GMSBooleanPlaceAttribute) -> String {
   if (val == GMSBooleanPlaceAttribute.true) {
-    return "yes";
+    return "TRUE";
   }
   
   if (val == GMSBooleanPlaceAttribute.false) {
-    return "no";
+    return "FALSE";
   }
   
-  return "unknown"
+  return "UNKNOWN"
 }
 
 func ParseBusinessStatus(val: GMSPlacesBusinessStatus) -> String {
   if (val == GMSPlacesBusinessStatus.closedPermanently) {
-    return "closedPermanently";
+    return "CLOSED_PERMANENTLY";
   }
   
   if (val == GMSPlacesBusinessStatus.closedTemporarily) {
-    return "closedTemporariliy";
+    return "CLOSED_TEMPORARILY";
   }
   
   if (val == GMSPlacesBusinessStatus.operational) {
-    return "operational";
+    return "OPERATIONAL";
   }
   
-  return "unknown";
+  return "UNKNOWN";
+}
+
+func ParseUrls(str: String) -> Array<String> {
+  let detector = try! NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+  let matches = detector.matches(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count))
+
+  var urls: Array<String> = []
+  for match in matches {
+      guard let range = Range(match.range, in: str) else { continue }
+      let url = str[range]
+      urls.append(String(url))
+  }
+  
+  return urls;
+}
+
+func ParsePhotoUrl(str: String) -> String {
+  let urls = ParseUrls(str: str);
+  if urls.isEmpty {
+    return "";
+  }
+  
+  return urls[0];
 }
 
 func ParsePlace(place: GMSPlace) -> NSDictionary {
@@ -186,6 +186,21 @@ func ParsePlace(place: GMSPlace) -> NSDictionary {
     "name": $0.name,
     "shortName": $0.shortName ?? "",
   ]}
+    
+    let plusCode = place.plusCode.map{[
+      "compoundCode": $0.compoundCode,
+      "globalCode": $0.globalCode,
+    ]}
+    
+    let photos = place.photos?.compactMap{[
+      "attributions": [
+        "url": ParsePhotoUrl(str: $0.attributions?.description ?? ""),
+        "name": $0.attributions?.string ?? "",
+      ],
+      "width": $0.maxSize.width,
+      "height": $0.maxSize.height,
+      "reference": "",
+    ]}
 
   var viewport: [String : Any]? = nil
   if let viewportInfo = place.viewportInfo{
@@ -211,7 +226,7 @@ func ParsePlace(place: GMSPlace) -> NSDictionary {
   return [
     "name": place.name ?? NSNull(),
     "placeID": place.placeID ?? NSNull(),
-    "plusCode": place.plusCode ?? NSNull(),
+    "plusCode": plusCode ?? NSNull(),
     "coordinate": coordinate,
     "openingHours": place.openingHours?.weekdayText ?? NSNull(),
     "phoneNumber": place.phoneNumber ?? "",
@@ -230,5 +245,7 @@ func ParsePlace(place: GMSPlace) -> NSDictionary {
     "delivery": ParseBooleanPlaceAttribute(val: place.delivery),
     "dineIn": ParseBooleanPlaceAttribute(val: place.dineIn),
     "curbsidePickup": ParseBooleanPlaceAttribute(val: place.curbsidePickup),
+    "attributions": place.attributions?.string ?? NSNull(),
+    "photos": photos ?? NSNull(),
   ]
 }
