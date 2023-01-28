@@ -13,6 +13,7 @@ import {
 import GooglePlacesSDK, {
   Place,
   PlacePrediction,
+  PredictionFiltersParam,
 } from 'react-native-google-places-sdk';
 import { Debounce } from './utils';
 
@@ -25,16 +26,21 @@ export default function App() {
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [place, setPlace] = useState<Place>();
 
-  const fetchPredictions = (currQuery: string) => {
-    GooglePlacesSDK.fetchPredictions(currQuery)
-      .then((fetchedPredictions) => setPredictions(fetchedPredictions))
+  const fetchPredictions = (
+    currQuery: string,
+    filters: PredictionFiltersParam
+  ) => {
+    GooglePlacesSDK.fetchPredictions(currQuery, filters)
+      .then((fetchedPredictions) => {
+        setPredictions(fetchedPredictions);
+      })
       .catch((err) => console.error(err));
   };
 
   const debouncedFetchPredictions = useRef(Debounce(fetchPredictions, 300));
 
   const fetchPlace = (placeID: string) => {
-    GooglePlacesSDK.fetchPlaceByID(placeID, [])
+    GooglePlacesSDK.fetchPlaceByID(placeID)
       .then((fetchedPlace) => {
         setPlace(fetchedPlace);
       })
@@ -43,10 +49,14 @@ export default function App() {
       });
   };
 
-  const onChangeText = (txt: string) => {
+  const onChangeQuery = (txt: string) => {
     setQuery(txt);
 
-    debouncedFetchPredictions.current(txt);
+    const filters: PredictionFiltersParam = {
+      countries: ['in', 'us'],
+      types: [],
+    };
+    debouncedFetchPredictions.current(txt, filters);
   };
 
   return (
@@ -57,7 +67,7 @@ export default function App() {
           style={styles.queryInput}
           value={query}
           placeholder="Search Place"
-          onChangeText={onChangeText}
+          onChangeText={onChangeQuery}
         />
         <FlatList
           data={predictions}
@@ -82,27 +92,7 @@ export default function App() {
           <Text>Click on one of the predictions to show the details</Text>
         ) : (
           <ScrollView>
-            <Text>Name: {place.name}</Text>
-            <Text>Place ID: {place.placeID}</Text>
-            <Text>Types: {place.types?.join(', ')}</Text>
-            <Text>Plus Code: {place.plusCode}</Text>
-            <Text>Coordinate: {JSON.stringify(place.coordinate)}</Text>
-            <Text>Opening Hours: {place.openingHours}</Text>
-            <Text>Phone Number: {place.phoneNumber}</Text>
-            <Text>Price Level: {place.priceLevel}</Text>
-            <Text>Website: {place.website}</Text>
-            <Text>Viewport: {JSON.stringify(place.viewport)}</Text>
-            <Text>
-              Address Components: {JSON.stringify(place.addressComponents)}
-            </Text>
-            <Text>Phones: {JSON.stringify(place.photos)}</Text>
-            <Text>
-              User Ratings Total: {JSON.stringify(place.userRatingsTotal)}
-            </Text>
-            <Text>UTC Offset: {JSON.stringify(place.utcOffsetMinutes)}</Text>
-            <Text>Business Status: {JSON.stringify(place.businessStatus)}</Text>
-            <Text>Icon Image URL: {JSON.stringify(place.iconImageURL)}</Text>
-            <Text />
+            <Text>{JSON.stringify(place.rating, undefined, 2)}</Text>
           </ScrollView>
         )}
       </View>
@@ -117,7 +107,7 @@ const styles = StyleSheet.create({
   },
   predictionWrapper: { marginTop: 10 },
   predictionDescription: { fontWeight: 'bold' },
-  section: { flex: 1 },
+  section: { flex: 1, marginTop: 10 },
   heading: { fontSize: 20 },
   queryInput: {
     borderWidth: 1,
