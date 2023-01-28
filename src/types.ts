@@ -9,12 +9,12 @@ export type PlacePrediction = {
   distanceMeters: number;
 };
 
-type LatLng = {
+export type LatLng = {
   latitude: number;
   longtiude: number;
 };
 
-type LocationBounds = {
+export type LocationBounds = {
   northEast: LatLng;
   southWest: LatLng;
 };
@@ -29,8 +29,16 @@ export type PredictionFiltersParam = {
 
 export type FieldsParam = (typeof PLACE_FIELDS)[keyof typeof PLACE_FIELDS][];
 
+export type AtmosphereCategoryStatus = 'TRUE' | 'FALSE' | 'UNKNOWN';
+
+export type BusinessStatus =
+  | 'OPERATIONAL'
+  | 'CLOSED_TEMPORARILY'
+  | 'CLOSED_PERMANENTLY'
+  | 'UNKNOWN';
+
 export type Place = {
-  name: String | null;
+  name: string | null;
   placeID: string | null;
   plusCode: string | null;
   coordinate: LatLng | null;
@@ -40,6 +48,7 @@ export type Place = {
   priceLevel: number | null;
   website: string | null;
   viewport: (LocationBounds & { valid: boolean }) | null;
+  formattedAddress: string | null;
   addressComponents:
     | {
         types: string[];
@@ -47,12 +56,23 @@ export type Place = {
         shortName: string;
       }[]
     | null;
-  photos: {
-    attributions: string;
-    maxSize: number | null;
-  } | null;
+  attributions: string | null;
+  rating: number;
   userRatingsTotal: number;
   utcOffsetMinutes: number | null;
-  businessStatus: string | null;
   iconImageURL: string | null;
+  businessStatus: BusinessStatus;
+  dineIn: AtmosphereCategoryStatus;
+  takeout: AtmosphereCategoryStatus;
+  delivery: AtmosphereCategoryStatus;
+  curbsidePickup: AtmosphereCategoryStatus;
+  photos: {
+    attributions: {
+      url: string;
+      name: string;
+    };
+    reference: string;
+    width: number;
+    height: number;
+  }[];
 };

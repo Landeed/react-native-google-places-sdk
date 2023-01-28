@@ -22,7 +22,7 @@ const GooglePlacesSdk = NativeModules.GooglePlacesSdk
         },
       }
     );
-console.log(GooglePlacesSdk);
+
 function initialize(apiKey: string) {
   GooglePlacesSdk.initialize(apiKey);
 }
