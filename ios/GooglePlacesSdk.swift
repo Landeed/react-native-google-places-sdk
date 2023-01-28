@@ -20,7 +20,7 @@ class GooglePlacesSdk: NSObject {
     DispatchQueue.main.async {
       GMSPlacesClient.provideAPIKey(apiKey)
       self.client = GMSPlacesClient.shared()
-    }Ï
+    }
   }
   
   @objc
