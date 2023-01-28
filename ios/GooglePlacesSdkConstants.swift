@@ -21,6 +21,7 @@ let PLACE_FIELD_MAP: NSDictionary = [
   "viewport": GMSPlaceField.viewport,
   "formattedAddress": GMSPlaceField.formattedAddress,
   "addressComponents": GMSPlaceField.addressComponents,
+  "rating": GMSPlaceField.rating,
   "userRatingsTotal": GMSPlaceField.userRatingsTotal,
   "utcOffsetMinutes": GMSPlaceField.utcOffsetMinutes,
   "businessStatus": GMSPlaceField.businessStatus,
