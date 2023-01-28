@@ -1,7 +1,7 @@
 {
   "name": "react-native-google-places-sdk",
-  "version": "0.1.0",
-  "description": "test",
+  "version": "0.1.1",
+  "description": "Google Places SDK for React Native",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/index.d.ts",
@@ -39,7 +39,11 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "google places",
+    "places sdk",
+    "typescript",
+    "autocomplete"
   ],
   "repository": "https://github.com/Kroniac/react-native-google-places-sdk",
   "author": "Kroniac <faridansari771277@gmail.com> (https://github.com/Kroniac)",
