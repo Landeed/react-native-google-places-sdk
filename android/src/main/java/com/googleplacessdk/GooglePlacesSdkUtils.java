@@ -1,6 +1,6 @@
 package com.googleplacessdk;
 
-import android.util.Log;
+import android.util.Patterns;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
@@ -9,17 +9,19 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.libraries.places.api.model.AddressComponent;
+import com.google.android.libraries.places.api.model.AddressComponents;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.PlusCode;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.regex.Matcher;
 
 class GooglePlacesSdkUtils {
   static LatLng ParseCoordinates(ReadableMap coordinates) {
@@ -87,7 +89,7 @@ class GooglePlacesSdkUtils {
   static WritableMap ParseAutocompletePrediction(AutocompletePrediction prediction) {
     WritableMap map = Arguments.createMap();
 
-    map.putString("placeId", prediction.getPlaceId());
+    map.putString("placeID", prediction.getPlaceId());
     map.putString("description", prediction.getFullText(null).toString());
     map.putString("primaryText", prediction.getPrimaryText(null).toString());
     map.putArray("types", ParsePlaceTypes(prediction.getPlaceTypes()));
@@ -113,29 +115,17 @@ class GooglePlacesSdkUtils {
   }
 
   static List<Place.Field> ParsePlaceFields(ReadableArray fields) {
-    Map<String, Place.Field> fieldMap = new HashMap<>();
-    fieldMap.put("name", Place.Field.NAME);
-    fieldMap.put("placeID", Place.Field.ID);
-    fieldMap.put("plusCode", Place.Field.PLUS_CODE);
-    fieldMap.put("coordinate", Place.Field.LAT_LNG);
-    fieldMap.put("openingHours", Place.Field.OPENING_HOURS);
-    fieldMap.put("phoneNumber", Place.Field.PHONE_NUMBER);
-    fieldMap.put("types", Place.Field.TYPES);
-    fieldMap.put("priceLevel", Place.Field.PRICE_LEVEL);
-    fieldMap.put("website", Place.Field.WEBSITE_URI);
-    fieldMap.put("viewport", Place.Field.VIEWPORT);
-    fieldMap.put("addressComponents", Place.Field.ADDRESS_COMPONENTS);
-    fieldMap.put("photos", Place.Field.PHOTO_METADATAS);
-    fieldMap.put("userRatingsTotal", Place.Field.USER_RATINGS_TOTAL);
-    fieldMap.put("utcOffsetMinutes", Place.Field.UTC_OFFSET);
-    fieldMap.put("businessStatus", Place.Field.BUSINESS_STATUS);
-    fieldMap.put("iconImageURL", Place.Field.ICON_URL);
-
     ArrayList<Place.Field> placeFields = new ArrayList<>();
     for (int i = 0; i < fields.size(); i++) {
       String field = fields.getString(i);
-      if (fieldMap.containsKey(field)) {
-        placeFields.add(fieldMap.get(field));
+      if (GooglePlacesSdkConstants.PLACE_FIELD_MAP.containsKey(field)) {
+        placeFields.add(GooglePlacesSdkConstants.PLACE_FIELD_MAP.get(field));
+      }
+    }
+
+    if (placeFields.size() == 0) {
+      for (Place.Field field : GooglePlacesSdkConstants.PLACE_FIELD_MAP.values()) {
+        placeFields.add(field);
       }
     }
 
@@ -150,25 +140,125 @@ class GooglePlacesSdkUtils {
     return map;
   }
 
+  static WritableArray ParseAddressComponents(AddressComponents addressComponents) {
+    WritableArray components = Arguments.createArray();
+    for (AddressComponent addressComponent : addressComponents.asList()) {
+      WritableMap componentMap = Arguments.createMap();
+      componentMap.putArray("types", Arguments.fromList(addressComponent.getTypes()));
+      componentMap.putString("name", addressComponent.getName());
+      componentMap.putString("shortName", addressComponent.getShortName());
+      components.pushMap(componentMap);
+    }
+
+    return components;
+  }
+
+  static ArrayList<String> ParseUrls(String str) {
+    Matcher webMatcher = Patterns.WEB_URL.matcher(str);
+    ArrayList<String> hyperLinks = new ArrayList<>();
+
+    while (webMatcher.find()) {
+      String res = webMatcher.group();
+      hyperLinks.add(res);
+    }
+
+    return hyperLinks;
+  }
+
+  static String ParsePhotoUrl(String str) {
+    ArrayList<String> urls = ParseUrls(str);
+    if (urls.size() == 0) return "";
+
+    return urls.get(0);
+  }
+
+  static WritableMap ParsePhotoAttributions(String attributions) {
+    String result = attributions.replaceAll("<[^>]*>", "");
+    WritableMap map = Arguments.createMap();
+    map.putString("url", ParsePhotoUrl(attributions));
+    map.putString("name", result);
+
+    return map;
+  }
+
+  static WritableArray ParsePhotos(List<PhotoMetadata> photos) {
+    WritableArray components = Arguments.createArray();
+    for (PhotoMetadata photo : photos) {
+      WritableMap componentMap = Arguments.createMap();
+      componentMap.putMap("attributions", ParsePhotoAttributions(photo.getAttributions()));
+      componentMap.putDouble("width", photo.getWidth());
+      componentMap.putDouble("height", photo.getHeight());
+      componentMap.putString("data", photo.toString());
+      componentMap.putString("reference", photo.zza());
+      components.pushMap(componentMap);
+    }
+
+    return components;
+  }
+
+  static WritableMap ParsePlusCode(PlusCode plusCode) {
+    WritableMap map = Arguments.createMap();
+    map.putString("compoundCode", plusCode.getCompoundCode());
+    map.putString("globalCode", plusCode.getGlobalCode());
+
+    return map;
+  }
+
   static WritableMap ParsePlace(Place place) {
     WritableMap placeInfo = Arguments.createMap();
 
     placeInfo.putString("name", place.getName());
     placeInfo.putString("placeID", place.getId());
     placeInfo.putString("phoneNumber", place.getPhoneNumber());
+    placeInfo.putString("formattedAddress", place.getAddress());
+    placeInfo.putString(
+      "businessStatus",
+      place.getBusinessStatus() != null ? place.getBusinessStatus().toString() : "UNKNOWN"
+    );
+    placeInfo.putString("takeout", place.getTakeout().toString());
+    placeInfo.putString("delivery", place.getDelivery().toString());
+    placeInfo.putString("dineIn", place.getDineIn().toString());
+    placeInfo.putString("curbsidePickup", place.getCurbsidePickup().toString());
+
+    if (place.getPhotoMetadatas() != null) {
+      placeInfo.putArray("photos", ParsePhotos(place.getPhotoMetadatas()));
+    } else placeInfo.putNull("photos");
+
+    if (place.getAttributions() != null) {
+      placeInfo.putString("attributions", place.getAttributions().toString());
+    } else placeInfo.putNull("attributions");
+
+    if (place.getPlusCode() != null) {
+      placeInfo.putMap("plusCode", ParsePlusCode(place.getPlusCode()));
+    } else placeInfo.putNull("plusCode");
+
+    if (place.getWebsiteUri() != null) {
+      placeInfo.putString("website", place.getWebsiteUri().toString());
+    } else placeInfo.putNull("website");
+
+    if (place.getRating() != null) {
+      placeInfo.putDouble("rating", place.getRating());
+    } else placeInfo.putNull("rating");
+
+    if (place.getUserRatingsTotal() != null) {
+      placeInfo.putInt("userRatingsTotal", place.getUserRatingsTotal());
+    } else placeInfo.putNull("userRatingsTotal");
 
     if (place.getPriceLevel() != null) {
       placeInfo.putInt("priceLevel", place.getPriceLevel());
     } else placeInfo.putNull("priceLevel");
 
     if (place.getOpeningHours() != null) {
-      Log.d("hasOpeningHours", "has");
       placeInfo.putString("openingHours", place.getOpeningHours().getWeekdayText().toString());
     } else placeInfo.putNull("openingHours");
 
     if (place.getTypes() != null) {
       placeInfo.putArray("types", ParsePlaceTypes(place.getTypes()));
     } else placeInfo.putNull("types");
+
+    if (place.getAddressComponents() != null) {
+      placeInfo.putArray("addressComponents", ParseAddressComponents(place.getAddressComponents()));
+    }
 
     if (place.getLatLng() != null) {
       WritableMap coordinate = ParseLatLng(place.getLatLng());

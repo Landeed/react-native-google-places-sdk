@@ -1,19 +1,29 @@
 package com.googleplacessdk;
 
-import androidx.annotation.NonNull;
+import com.facebook.react.bridge.ReadableArray;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.gms.common.api.ApiException;
 
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.module.annotations.ReactModule;
+
+import java.util.List;
 
 @ReactModule(name = GooglePlacesSdkModule.NAME)
 public class GooglePlacesSdkModule extends ReactContextBaseJavaModule {
   public static final String NAME = "GooglePlacesSdk";
   private String NOT_INITIALIZED_MSG = "Google Places not initialized. Initialize by calling initialize method before calling any other methods";
   private ReactApplicationContext reactContext;
-  private String TAG = "Places";
+  private String TAG = "GooglePlacesSdk";
   private PlacesClient placesClient;
 
 
@@ -22,6 +32,10 @@ public class GooglePlacesSdkModule extends ReactContextBaseJavaModule {
     this.reactContext = reactContext;
   }
 
+  @Override
+  public String getName() {
+    return TAG;
+  }
 
   @ReactMethod
   public void initialize(String apiKey) {
