@@ -23,11 +23,12 @@ const GooglePlacesSdk = NativeModules.GooglePlacesSdk
       }
     );
 
-function initialize(apiKey: string) {
+export function initialize(apiKey: string) {
+  if (!apiKey) return;
   GooglePlacesSdk.initialize(apiKey);
 }
 
-async function fetchPredictions(
+export async function fetchPredictions(
   query: string,
   filters: PredictionFiltersParam = {}
 ): Promise<PlacePrediction[]> {
@@ -36,7 +37,7 @@ async function fetchPredictions(
   return predictions;
 }
 
-async function fetchPlaceByID(
+export async function fetchPlaceByID(
   placeID: string,
   fields: FieldsParam = []
 ): Promise<Place> {
@@ -44,11 +45,3 @@ async function fetchPlaceByID(
 
   return place;
 }
-
-const GooglePlacesSDK = {
-  initialize,
-  fetchPredictions,
-  fetchPlaceByID,
-};
-
-export default GooglePlacesSDK;

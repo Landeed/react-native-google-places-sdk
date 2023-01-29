@@ -2,4 +2,6 @@ export * from './types';
 
 export * from './constants';
 
-export { default } from './googlePlacesSdk';
+import * as GooglePlacesSDK from './googlePlacesSdk';
+
+export default GooglePlacesSDK;
