@@ -92,7 +92,7 @@ export default function App() {
           <Text>Click on one of the predictions to show the details</Text>
         ) : (
           <ScrollView>
-            <Text>{JSON.stringify(place.rating, undefined, 2)}</Text>
+            <Text>{JSON.stringify(place, undefined, 2)}</Text>
           </ScrollView>
         )}
       </View>
