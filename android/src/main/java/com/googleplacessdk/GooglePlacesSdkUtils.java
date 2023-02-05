@@ -25,7 +25,7 @@ import java.util.regex.Matcher;
 
 class GooglePlacesSdkUtils {
   static LatLng ParseCoordinates(ReadableMap coordinates) {
-    if (!coordinates.hasKey("latitude") || coordinates.hasKey("longitude")) {
+    if (!coordinates.hasKey("latitude") || !coordinates.hasKey("longitude")) {
       return null;
     }
 
@@ -42,7 +42,7 @@ class GooglePlacesSdkUtils {
 
     if (northEast == null || southWest == null) return null;
 
-    return RectangularBounds.newInstance(northEast, southWest);
+    return RectangularBounds.newInstance(southWest, northEast);
   }
 
   static FindAutocompletePredictionsRequest buildPredictionRequest(String query, ReadableMap options) {

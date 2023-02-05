@@ -11,7 +11,7 @@ export type PlacePrediction = {
 
 export type LatLng = {
   latitude: number;
-  longtiude: number;
+  longitude: number;
 };
 
 export type LocationBounds = {
