@@ -45,13 +45,13 @@
     "typescript",
     "autocomplete"
   ],
-  "repository": "https://github.com/Kroniac/react-native-google-places-sdk",
-  "author": "Kroniac <faridansari771277@gmail.com> (https://github.com/Kroniac)",
+  "repository": "https://github.com/Landeed/react-native-google-places-sdk",
+  "author": "Farid Ansari <faridansari771277@gmail.com> (https://github.com/Kroniac)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Kroniac/react-native-google-places-sdk/issues"
+    "url": "https://github.com/Landeed/react-native-google-places-sdk/issues"
   },
-  "homepage": "https://github.com/Kroniac/react-native-google-places-sdk#readme",
+  "homepage": "https://github.com/Landeed/react-native-google-places-sdk#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
