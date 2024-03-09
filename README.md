@@ -108,8 +108,8 @@ type PlacePrediction = {
 import GooglePlacesSDK, { PLACE_FIELDS } from 'react-native-google-places-sdk';
 
 GooglePlacesSDK.fetchPredictions(
-  query = "Mumbai",
-  filters = { countries: ["in", "us"] }
+  "Mumbai", // query
+  { countries: ["in", "us"] } // filters
 )
   .then((predictions) => console.log(predictions));
   .catch((error) => console.log(error));
