@@ -1,4 +1,5 @@
 [![Landeed founding fullstack engineer hiring](https://github.com/user-attachments/assets/f5298bfc-cf7f-42d2-842c-4e2e815165af)](https://www.ycombinator.com/companies/landeed/jobs/1RGlF1W-founding-fullstack-engineer-react-react-native-any-backend-india)
+[Apply for the role](https://www.ycombinator.com/companies/landeed/jobs/1RGlF1W-founding-fullstack-engineer-react-react-native-any-backend-india)
 
 
 # Google Places SDK for React Native
