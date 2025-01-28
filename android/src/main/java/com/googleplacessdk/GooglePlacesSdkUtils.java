@@ -9,6 +9,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.AddressComponent;
 import com.google.android.libraries.places.api.model.AddressComponents;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
@@ -45,7 +46,8 @@ class GooglePlacesSdkUtils {
     return RectangularBounds.newInstance(southWest, northEast);
   }
 
-  static FindAutocompletePredictionsRequest buildPredictionRequest(String query, ReadableMap options) {
+  static FindAutocompletePredictionsRequest buildPredictionRequest(String query, ReadableMap options,
+                                                                   AutocompleteSessionToken sessionToken) {
     FindAutocompletePredictionsRequest.Builder builder = FindAutocompletePredictionsRequest.builder();
     if (options.hasKey("types")) {
       ArrayList types = options.getArray("types").toArrayList();
@@ -70,6 +72,10 @@ class GooglePlacesSdkUtils {
     if (options.hasKey("origin")) {
       LatLng origin = ParseCoordinates(options.getMap("origin"));
       if (origin != null) builder.setOrigin(origin);
+    }
+
+    if (sessionToken != null) {
+      builder.setSessionToken(sessionToken);
     }
 
     return builder
