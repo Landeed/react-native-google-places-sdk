@@ -1,6 +1,6 @@
 package com.googleplacessdk;
 
-import com.facebook.react.bridge.ReadableArray;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
@@ -8,6 +8,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.gms.common.api.ApiException;
 
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -16,16 +17,22 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.module.annotations.ReactModule;
 
+import android.util.Log;
+
 import java.util.List;
 
 @ReactModule(name = GooglePlacesSdkModule.NAME)
 public class GooglePlacesSdkModule extends ReactContextBaseJavaModule {
   public static final String NAME = "GooglePlacesSdk";
   private String NOT_INITIALIZED_MSG = "Google Places not initialized. Initialize by calling initialize method before calling any other methods";
+  private final String SESSION_LOG_TAG = "GooglePlacesSession";
+  private final String NEW_SESSION_STARTED = "NEW_SESSION_STARTED";
+  private final String SESSION_CLEARED = "SESSION_CLEARED";
+  private final String NO_ACTIVE_SESSION = "NO_ACTIVE_SESSION";
   private ReactApplicationContext reactContext;
   private String TAG = "GooglePlacesSdk";
   private PlacesClient placesClient;
-
+  private AutocompleteSessionToken sessionToken;
 
   public GooglePlacesSdkModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -43,22 +50,57 @@ public class GooglePlacesSdkModule extends ReactContextBaseJavaModule {
     placesClient = Places.createClient(reactContext);
   }
 
+  // generate a new session token manually
+  @ReactMethod
+  public void startNewSession(final Promise promise) {
+    if (!Places.isInitialized()) {
+      promise.reject(
+        "-1",
+        new Error(NOT_INITIALIZED_MSG));
+      return;
+    }
+
+    sessionToken = AutocompleteSessionToken.newInstance();
+    promise.resolve(NEW_SESSION_STARTED);
+  }
+
+  @ReactMethod
+  public void clearSession(final Promise promise) {
+    if (!Places.isInitialized()) {
+      promise.reject(
+        "-1",
+        new Error(NOT_INITIALIZED_MSG));
+      return;
+    }
+
+    if (sessionToken == null) {
+      promise.resolve(NO_ACTIVE_SESSION);
+      return;
+    }
+
+    sessionToken = null;
+    promise.resolve(SESSION_CLEARED);
+  }
+
   @ReactMethod
   public void fetchPredictions(String query, ReadableMap options, final Promise promise) {
     if (!Places.isInitialized()) {
       promise.reject(
         "-1",
-        new Error(NOT_INITIALIZED_MSG)
-      );
+        new Error(NOT_INITIALIZED_MSG));
       return;
     }
 
-    FindAutocompletePredictionsRequest request = GooglePlacesSdkUtils.buildPredictionRequest(query, options);
+    if (sessionToken == null) {
+      sessionToken = AutocompleteSessionToken.newInstance(); // Auto-generate if missing
+    }
+
+    FindAutocompletePredictionsRequest request = GooglePlacesSdkUtils.buildPredictionRequest(query, options,
+      sessionToken);
     placesClient.findAutocompletePredictions(request)
       .addOnSuccessListener((response) -> {
         WritableArray parsedPredictions = GooglePlacesSdkUtils.ParseAutocompletePredictions(
-          response.getAutocompletePredictions()
-        );
+          response.getAutocompletePredictions());
         promise.resolve(parsedPredictions);
       })
       .addOnFailureListener((exception) -> {
@@ -66,8 +108,7 @@ public class GooglePlacesSdkModule extends ReactContextBaseJavaModule {
           ApiException apiException = (ApiException) exception;
           promise.reject(
             Integer.toString(apiException.getStatusCode()),
-            apiException.getLocalizedMessage()
-          );
+            apiException.getLocalizedMessage());
         }
       });
   }
@@ -77,17 +118,24 @@ public class GooglePlacesSdkModule extends ReactContextBaseJavaModule {
     if (!Places.isInitialized()) {
       promise.reject(
         "-1",
-        new Error(NOT_INITIALIZED_MSG)
-      );
+        new Error(NOT_INITIALIZED_MSG));
       return;
     }
 
     List<Place.Field> placeFields = GooglePlacesSdkUtils.ParsePlaceFields(fields);
-    FetchPlaceRequest placeRequest = FetchPlaceRequest.newInstance(placeID, placeFields);
+    FetchPlaceRequest.Builder placeRequestBuilder = FetchPlaceRequest.builder(placeID, placeFields);
+    if (sessionToken != null) {
+      placeRequestBuilder.setSessionToken(sessionToken);
+    } else {
+      Log.w(SESSION_LOG_TAG, "⚠️ Session Token is null. Place selection might not be billed efficiently.");
+    }
+    FetchPlaceRequest placeRequest = placeRequestBuilder.build();
+
     placesClient.fetchPlace(placeRequest)
       .addOnSuccessListener((response) -> {
         Place place = response.getPlace();
         promise.resolve(GooglePlacesSdkUtils.ParsePlace((place)));
+        sessionToken = null; // Reset session token after successful fetch
       })
       .addOnFailureListener((exception) -> {
         if (exception instanceof ApiException) {
