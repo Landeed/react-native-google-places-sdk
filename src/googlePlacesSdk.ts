@@ -45,3 +45,15 @@ export async function fetchPlaceByID(
 
   return place;
 }
+
+export async function startNewSession() {
+  const msg = await GooglePlacesSdk.startNewSession();
+
+  return msg;
+}
+
+export async function clearSession() {
+  const msg = await GooglePlacesSdk.clearSession();
+
+  return msg;
+}
