@@ -10,10 +10,14 @@ import Foundation
 import GooglePlaces
 
 let NOT_INITIALIZED_MSG = "Google Places not initialized. Initialize by calling initialize method before calling any other methods"
+let NEW_SESSION_CREATED = "NEW_SESSION_CREATED"
+let SESSION_CLEARED = "SESSION_CLEARED";
+let NO_ACTIVE_SESSION = "NO_ACTIVE_SESSION";
 
 @objc(GooglePlacesSdk)
 class GooglePlacesSdk: NSObject {
   private var client: GMSPlacesClient? = nil;
+  private var sessionToken: GMSAutocompleteSessionToken? = nil;
   
   @objc
   func initialize(_ apiKey: String) -> Void {
@@ -24,17 +28,47 @@ class GooglePlacesSdk: NSObject {
   }
   
   @objc
+  func startNewSession(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+      guard let client = self.client else {
+          reject("-1", NOT_INITIALIZED_MSG, NSError(domain: "", code: 0))
+          return
+      }
+      
+      self.sessionToken = GMSAutocompleteSessionToken()
+      resolve(NEW_SESSION_CREATED)
+  }
+  
+  @objc
+  func clearSession(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+      guard let _ = self.client else {
+          reject("-1", NOT_INITIALIZED_MSG, NSError(domain: "", code: 0))
+          return
+      }
+    
+      if self.sessionToken == nil {
+          resolve(NO_ACTIVE_SESSION)
+          return
+      }
+      
+      self.sessionToken = nil
+      resolve(SESSION_CLEARED)
+  }
+  
+  @objc
   func fetchPredictions(_ query: String, filterOptions: NSDictionary,  resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
     guard let client = self.client else {
       reject("-1", NOT_INITIALIZED_MSG, NSError(domain: "", code: 0))
       return
     }
     
+    // Use sessionToken if it exists, otherwise create a new one
+    self.sessionToken = self.sessionToken ?? GMSAutocompleteSessionToken()
+    
     let filter = AutocompleteFilterFromOptions(filterOptions)
     client.findAutocompletePredictions(
       fromQuery: query,
       filter: filter,
-      sessionToken: nil,
+      sessionToken: self.sessionToken,
       callback: {(results, error) in
         guard let results = results, error == nil else {
           let errorCode = error?._code ?? 0
@@ -71,7 +105,7 @@ class GooglePlacesSdk: NSObject {
     let parsedFields = GMSPlaceFieldsFromFields(fields: fields)
     let selectedFields: GMSPlaceField = parsedFields
     
-    client.fetchPlace(fromPlaceID: placeID, placeFields: selectedFields, sessionToken: nil, callback: {(place: GMSPlace?, error: Error?) in
+    client.fetchPlace(fromPlaceID: placeID, placeFields: selectedFields, sessionToken: self.sessionToken, callback: {(place: GMSPlace?, error: Error?) in
       guard let place = place, error == nil else {
         let errorCode = error?._code ?? 0
         let errorMsg = error?.localizedDescription ?? "Unknown Error"
@@ -80,6 +114,8 @@ class GooglePlacesSdk: NSObject {
       }
       let parsedPlace = ParsePlace(place: place)
       resolve(parsedPlace)
+      
+      self.sessionToken = nil
     })
   }
 }
