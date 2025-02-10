@@ -46,7 +46,7 @@ public class GooglePlacesSdkModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void initialize(String apiKey) {
-    Places.initialize(reactContext, apiKey);
+    Places.initializeWithNewPlacesApiEnabled(reactContext, apiKey);
     placesClient = Places.createClient(reactContext);
   }
 
