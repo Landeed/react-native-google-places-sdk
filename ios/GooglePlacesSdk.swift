@@ -64,36 +64,22 @@ class GooglePlacesSdk: NSObject {
     // Use sessionToken if it exists, otherwise create a new one
     self.sessionToken = self.sessionToken ?? GMSAutocompleteSessionToken()
     
-    let filter = AutocompleteFilterFromOptions(filterOptions)
-    client.findAutocompletePredictions(
-      fromQuery: query,
-      filter: filter,
-      sessionToken: self.sessionToken,
-      callback: {(results, error) in
-        guard let results = results, error == nil else {
-          let errorCode = error?._code ?? 0
-          let errorMsg = error?.localizedDescription ?? "Unknown Error"
-          reject(String(errorCode), errorMsg, error)
-          return
-        }
-
-        let predictions: NSMutableArray = []
-        for result in results {
-          let dict: NSMutableDictionary = [
-            "placeID": result.placeID,
-            "description": result.attributedFullText.string,
-            "primaryText": result.attributedPrimaryText.string,
-            "secondaryText": result.attributedSecondaryText?.string ?? NSNull(),
-            "types": result.types,
-            "distanceMeters": result.distanceMeters?.intValue ?? NSNull()
-          ]
-          predictions.add(dict)
-        }
-        resolve(predictions)
+    let request = GMSAutocompleteRequest(query: query)
+    request.filter = AutocompleteFilterFromOptions(filterOptions)
+    request.sessionToken = self.sessionToken
+        
+    client.fetchAutocompleteSuggestions(from: request, callback: { ( results: Optional<Array<GMSAutocompleteSuggestion>>, error: Error? ) in
+      guard let results = results, error == nil else {
+        let errorCode = error?._code ?? 0
+        let errorMsg = error?.localizedDescription ?? "Unknown Error"
+        reject(String(errorCode), errorMsg, error)
+        return
       }
-    )
+      
+      let parsedSuggestions = ParseSuggesttions(suggestions: results)
+      resolve(parsedSuggestions)
+    })
   }
-
   
   @objc
   func fetchPlaceByID(_ placeID: String, fields: NSArray, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
@@ -105,17 +91,23 @@ class GooglePlacesSdk: NSObject {
     let parsedFields = GMSPlaceFieldsFromFields(fields: fields)
     let selectedFields: GMSPlaceField = parsedFields
     
-    client.fetchPlace(fromPlaceID: placeID, placeFields: selectedFields, sessionToken: self.sessionToken, callback: {(place: GMSPlace?, error: Error?) in
+    let myProperties = [GMSPlaceProperty.addressComponents, GMSPlaceProperty.name, GMSPlaceProperty.openingHours, GMSPlaceProperty.coordinate, GMSPlaceProperty.photos, GMSPlaceProperty.plusCode, GMSPlaceProperty.dineIn, GMSPlaceProperty.userRatingsTotal, GMSPlaceProperty.takeout, GMSPlaceProperty.priceLevel, GMSPlaceProperty.phoneNumber, GMSPlaceProperty.curbsidePickup, GMSPlaceProperty.types, GMSPlaceProperty.placeID, GMSPlaceProperty.businessStatus, GMSPlaceProperty.viewport, GMSPlaceProperty.rating, GMSPlaceProperty.delivery, GMSPlaceProperty.formattedAddress, GMSPlaceProperty.website].map {$0.rawValue}
+    
+    let fetchPlaceRequest = GMSFetchPlaceRequest(placeID: placeID, placeProperties: myProperties, sessionToken: nil)
+    
+    client.fetchPlace(with: fetchPlaceRequest, callback: {(place: GMSPlace?, error: Error?) in
       guard let place = place, error == nil else {
         let errorCode = error?._code ?? 0
         let errorMsg = error?.localizedDescription ?? "Unknown Error"
         reject(String(errorCode), errorMsg, error)
         return
       }
+
       let parsedPlace = ParsePlace(place: place)
       resolve(parsedPlace)
       
       self.sessionToken = nil
     })
+    
   }
 }
