@@ -1,6 +1,9 @@
 package com.googleplacessdk;
 
+import android.os.Parcel;
 import android.util.Patterns;
+
+import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
@@ -13,13 +16,18 @@ import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.AddressComponent;
 import com.google.android.libraries.places.api.model.AddressComponents;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.CircularBounds;
+import com.google.android.libraries.places.api.model.LocationRestriction;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.PlusCode;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.libraries.places.api.net.SearchByTextRequest;
+import com.google.android.libraries.places.api.net.SearchNearbyRequest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -44,6 +52,39 @@ class GooglePlacesSdkUtils {
     if (northEast == null || southWest == null) return null;
 
     return RectangularBounds.newInstance(southWest, northEast);
+  }
+
+  static SearchByTextRequest buildSearchByTextRequest(String query, ReadableMap options,
+                                                      AutocompleteSessionToken sessionToken) {
+
+    // Specify the list of fields to return.
+    final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME,
+      Place.Field.LAT_LNG, Place.Field.ADDRESS, Place.Field.TYPES,
+      Place.Field.WEBSITE_URI, Place.Field.ADDRESS_COMPONENTS
+    );
+
+    SearchByTextRequest.Builder builder = SearchByTextRequest.builder(query, placeFields).setMaxResultCount(10);
+
+    return builder
+      .build();
+  }
+
+  static SearchNearbyRequest buildSearchNearByRequest(ReadableMap options,
+                                                      AutocompleteSessionToken sessionToken) {
+
+    // Specify the list of fields to return.
+    final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME,
+      Place.Field.LAT_LNG, Place.Field.ADDRESS, Place.Field.TYPES,
+       Place.Field.WEBSITE_URI, Place.Field.ADDRESS_COMPONENTS
+     );
+
+    LatLng center = new LatLng(options.getDouble("latitude"), options.getDouble("longitude"));
+    CircularBounds circle = CircularBounds.newInstance(center, /* radius = */  options.getDouble("radius"));
+
+    SearchNearbyRequest.Builder builder = SearchNearbyRequest.builder(circle, placeFields).setMaxResultCount(10);
+
+    return builder
+      .build();
   }
 
   static FindAutocompletePredictionsRequest buildPredictionRequest(String query, ReadableMap options,
@@ -111,6 +152,34 @@ class GooglePlacesSdkUtils {
     return map;
   }
 
+  static WritableMap ParseSearchByText(Place place) {
+    WritableMap map = Arguments.createMap();
+
+
+    map.putString("name", place.getName());
+    map.putString("placeID", place.getId());
+    map.putString("phoneNumber", place.getPhoneNumber());
+    map.putString("formattedAddress", place.getAddress());
+    map.putString("description", place.getAddress());
+    map.putString("websiteUri", place.getWebsiteUri() != null ? place.getWebsiteUri().toString() : "");
+
+    if (place.getLatLng() != null) {
+      LatLng latLng = place.getLatLng();
+      map.putMap("coordinate", ParseLatLngSearchText(latLng));
+      map.putMap("location", ParseLatLngSearchText(latLng));
+    }
+
+    if (place.getTypes() != null) {
+      map.putArray("types", ParsePlaceTypes(place.getTypes()));
+    } else map.putNull("types");
+
+    if (place.getAddressComponents() != null) {
+      map.putArray("addressComponents", ParseAddressComponents(place.getAddressComponents()));
+    }
+
+    return map;
+  }
+
   static WritableArray ParseAutocompletePredictions(List<AutocompletePrediction> predictions) {
     WritableArray parsedPredictions = Arguments.createArray();
     for (AutocompletePrediction prediction : predictions) {
@@ -118,6 +187,15 @@ class GooglePlacesSdkUtils {
     }
 
     return parsedPredictions;
+  }
+
+  static WritableArray ParseSearchByTexts(List<Place> places) {
+    WritableArray parsesPlaces = Arguments.createArray();
+    for (Place place : places) {
+      parsesPlaces.pushMap(ParseSearchByText(place));
+    }
+
+    return parsesPlaces;
   }
 
   static List<Place.Field> ParsePlaceFields(ReadableArray fields) {
@@ -145,6 +223,15 @@ class GooglePlacesSdkUtils {
 
     return map;
   }
+
+  static WritableMap ParseLatLngSearchText(LatLng latLng) {
+    WritableMap map = Arguments.createMap();
+    map.putDouble("lat", latLng.latitude);
+    map.putDouble("lng", latLng.longitude);
+
+    return map;
+  }
+
 
   static WritableArray ParseAddressComponents(AddressComponents addressComponents) {
     WritableArray components = Arguments.createArray();

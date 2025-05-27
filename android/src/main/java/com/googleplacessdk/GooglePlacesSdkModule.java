@@ -16,6 +16,8 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.module.annotations.ReactModule;
+import com.google.android.libraries.places.api.net.SearchByTextRequest;
+import com.google.android.libraries.places.api.net.SearchNearbyRequest;
 
 import android.util.Log;
 
@@ -101,6 +103,72 @@ public class GooglePlacesSdkModule extends ReactContextBaseJavaModule {
       .addOnSuccessListener((response) -> {
         WritableArray parsedPredictions = GooglePlacesSdkUtils.ParseAutocompletePredictions(
           response.getAutocompletePredictions());
+        promise.resolve(parsedPredictions);
+      })
+      .addOnFailureListener((exception) -> {
+        if (exception instanceof ApiException) {
+          ApiException apiException = (ApiException) exception;
+          promise.reject(
+            Integer.toString(apiException.getStatusCode()),
+            apiException.getLocalizedMessage());
+        }
+      });
+  }
+
+  @ReactMethod
+  public void searchNearby(ReadableMap options, ReadableArray fields, final Promise promise) {
+    if (!Places.isInitialized()) {
+      promise.reject(
+        "-1",
+        new Error(NOT_INITIALIZED_MSG));
+      return;
+    }
+
+    if (sessionToken == null) {
+      sessionToken = AutocompleteSessionToken.newInstance(); // Auto-generate if missing
+    }
+
+    SearchNearbyRequest request = GooglePlacesSdkUtils.buildSearchNearByRequest(options,
+      sessionToken);
+
+    placesClient.searchNearby(request)
+      .addOnSuccessListener((response) -> {
+        WritableArray parsedPredictions = GooglePlacesSdkUtils.ParseSearchByTexts(
+          response.getPlaces());
+        promise.resolve(parsedPredictions);
+      })
+      .addOnFailureListener((exception) -> {
+        if (exception instanceof ApiException) {
+          ApiException apiException = (ApiException) exception;
+          promise.reject(
+            Integer.toString(apiException.getStatusCode()),
+            apiException.getLocalizedMessage());
+        }
+      });
+  }
+  //
+
+
+  @ReactMethod
+  public void searchByText(String query, ReadableMap options, final Promise promise) {
+    if (!Places.isInitialized()) {
+      promise.reject(
+        "-1",
+        new Error(NOT_INITIALIZED_MSG));
+      return;
+    }
+
+    if (sessionToken == null) {
+      sessionToken = AutocompleteSessionToken.newInstance(); // Auto-generate if missing
+    }
+
+    SearchByTextRequest request = GooglePlacesSdkUtils.buildSearchByTextRequest(query, options,
+      sessionToken);
+
+    placesClient.searchByText(request)
+      .addOnSuccessListener((response) -> {
+        WritableArray parsedPredictions = GooglePlacesSdkUtils.ParseSearchByTexts(
+          response.getPlaces());
         promise.resolve(parsedPredictions);
       })
       .addOnFailureListener((exception) -> {
