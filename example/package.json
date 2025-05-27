@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "react": "18.2.0",
-    "react-native": "0.71.1",
+    "react-native": "0.71.19",
     "react-native-google-places-sdk": "file:../"
   },
   "devDependencies": {

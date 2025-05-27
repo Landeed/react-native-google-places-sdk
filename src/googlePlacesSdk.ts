@@ -46,6 +46,28 @@ export async function fetchPlaceByID(
   return place;
 }
 
+export async function searchByText(
+  query: string,
+  filters: PredictionFiltersParam = {}
+): Promise<PlacePrediction[]> {
+  const predictions = await GooglePlacesSdk.searchByText(query, filters);
+
+  return predictions;
+}
+
+export async function searchNearby(
+options:{
+  latitude: number,
+  longitude: number,
+  radius: number,
+},
+  includedTypes: Array<string> = []
+): Promise<any> {
+  const places = await GooglePlacesSdk.searchNearby(options, includedTypes);
+
+  return places;
+}
+
 export async function startNewSession() {
   const msg = await GooglePlacesSdk.startNewSession();
 

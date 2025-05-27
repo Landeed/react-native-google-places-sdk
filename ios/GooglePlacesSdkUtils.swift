@@ -180,6 +180,22 @@ func ParsePhotoUrl(str: String) -> String {
   return urls[0];
 }
 
+func ParseSuggesttions(suggestions: Array<GMSAutocompleteSuggestion>) -> NSMutableArray {
+    let predictions: NSMutableArray = []
+    for suggestion in suggestions {
+        let dict: NSMutableDictionary = [
+            "placeID": suggestion.placeSuggestion?.placeID,
+            "description": suggestion.placeSuggestion?.attributedFullText.string,
+            "primaryText": suggestion.placeSuggestion?.attributedPrimaryText.string,
+            "secondaryText": suggestion.placeSuggestion?.attributedSecondaryText?.string ?? NSNull(),
+            "types": suggestion.placeSuggestion?.types,
+            "distanceMeters": suggestion.placeSuggestion?.distanceMeters?.intValue ?? NSNull()
+        ]
+        predictions.add(dict)
+    }
+    return predictions
+}
+
 func ParsePlace(place: GMSPlace) -> NSDictionary {
   let addressComponents = place.addressComponents?.compactMap{ [
     "types": $0.types,
