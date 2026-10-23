@@ -26,16 +26,7 @@ Pod::Spec.new do |s|
       "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
     }
     
-    # Core New-Arch dependencies
-    s.dependency "React-Codegen"
-    s.dependency "RCTRequired"
-    s.dependency "RCTTypeSafety"
-    s.dependency "ReactCommon/turbomodule/core"
-    
-    # RN 0.76+ uses React-RCTFabric which includes Folly
-    s.dependency "React-RCTFabric"
-    s.dependency "React-Fabric"
-    s.dependency "React-graphics"
-    s.dependency "React-utils"
+    # Let React Native declare its own pods: hand-listed names go stale across RN releases.
+    install_modules_dependencies(s)
   end
 end
